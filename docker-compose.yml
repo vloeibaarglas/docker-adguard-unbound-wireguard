@@ -9,12 +9,13 @@ networks:
 
 services:
   unbound:
-    image: "mvance/unbound:latest"
+    image: klutchell/unbound
     container_name: unbound
     restart: unless-stopped
-    hostname: "unbound"
+    hostname: unbound
     volumes:
-      - "./unbound:/opt/unbound/etc/unbound/"
+      # Mapped to /etc/unbound (Standard for this image)
+      - "./unbound:/etc/unbound"
     networks:
       private_network:
         ipv4_address: 10.2.0.200
@@ -29,13 +30,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/London # Change to your timezone
+      - TZ=America/New_York
       - SERVERPORT=51820
-      #- SERVERURL=my.ddns.net #optional - For use with DDNS (Uncomment to use)
-      - PEERS=1 # How many peers to generate for you (clients)
-      - PEERDNS=10.2.0.100 # Set it to point to adguard home
+      - PEERS=6
+      - PEERDNS=10.2.0.100 # Points to AdGuard
       - INTERNAL_SUBNET=10.6.0.0
-      #- ALLOWEDIPS=10.2.0.0/24 # optional - split tunnel for web panel and DNS traffic only
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules
@@ -54,7 +53,6 @@ services:
     image: adguard/adguardhome
     restart: unless-stopped
     hostname: adguard
-    # Volumes store your data between container upgrades
     volumes:
       - "./adguard/opt-adguard-work:/opt/adguardhome/work"
       - "./adguard/opt-adguard-conf:/opt/adguardhome/conf"
